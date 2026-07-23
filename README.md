@@ -1,6 +1,6 @@
 # My Bookmarks Manager
 
-Open-source, local-first bookmark manager for Chrome. Save private pages, tab sessions, local captures, and reminders without overriding Chrome's default New Tab page.
+Free bookmark manager for Chrome with an open-source, local-first design. Save private pages, tab sessions, local captures, and reminders without overriding Chrome's default New Tab page.
 
 This repository contains the standalone Chrome extension. The website and optional New Tab companion are maintained separately.
 
