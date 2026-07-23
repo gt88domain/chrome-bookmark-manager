@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title data-i18n="documentTitle">urls.ai Bookmarks</title>
+    <link rel="stylesheet" href="./sidepanel.css" />
+    <link rel="stylesheet" href="./popup.css" />
+  </head>
+  <body class="popup-mode">
+    <div class="shell popupShell">
+      <header class="header popupHeader">
+        <div class="popupHeading">
+          <div class="brandTitleRow">
+            <h1 data-i18n="appTitle">My Bookmarks Manager</h1>
+            <img class="brandLockup" src="./brand-lockup.png" alt="urls.ai" />
+          </div>
+          <p data-i18n="popupSubtitle">All your URLs in one place.</p>
+        </div>
+        <div class="actions popupActions">
+          <button id="importButton" class="btn btn-outline btn-icon-text"><span class="btnIcon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><path d="M10 13V4m0 0 3 3m-3-3L7 7M4 13.5V15a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span data-i18n="importJson">Import JSON</span></button>
+          <button id="exportButton" class="btn btn-outline btn-icon-text"><span class="btnIcon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><path d="M10 7v9m0 0 3-3m-3 3-3-3M4 6.5V5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span data-i18n="exportData">Export</span></button>
+          <button id="savePageButton" class="btn btn-outline btn-icon-text"><span class="btnIcon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><rect x="4.5" y="3.5" width="11" height="13" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M7 7h6M7 10h6M7 13h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><span data-i18n="savePrivatePage">Save Private Page</span></button>
+          <button id="saveWindowButton" class="btn btn-primary btn-icon-text"><span class="btnIcon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none"><rect x="3.5" y="4.5" width="13" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><path d="M8 4v11.5" stroke="currentColor" stroke-width="1.7"/></svg></span><span data-i18n="saveWindow">Save Window</span></button>
+        </div>
+      </header>
+
+      <div class="tabs popupTabs">
+        <button data-tab="bookmarks" class="tab active" data-i18n="tabBookmarks">Bookmarks</button>
+        <button data-tab="domain" class="tab" data-i18n="tabDomain">Domain</button>
+        <button data-tab="captures" class="tab" data-i18n="tabCaptures">Captures</button>
+        <button data-tab="private" class="tab" data-i18n="tabPrivate">Private</button>
+        <button data-tab="reminders" class="tab" data-i18n="tabReminders">Reminders</button>
+        <button data-tab="sessions" class="tab" data-i18n="tabSessions">Sessions</button>
+        <button data-tab="settings" class="tab" data-i18n="tabSettings">Settings</button>
+      </div>
+
+      <div class="searchRow">
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="Search bookmarks or sessions..."
+          data-i18n-placeholder="searchPlaceholder"
+        />
+      </div>
+
+      <div id="status" class="status hidden" role="status" aria-live="polite"></div>
+      <div id="reminderAlert" class="reminderAlert hidden" role="alert" aria-live="assertive">
+        <div class="reminderAlertBody">
+          <div id="reminderAlertTitle" class="reminderAlertTitle"></div>
+          <div id="reminderAlertMeta" class="reminderAlertMeta"></div>
+        </div>
+        <div class="reminderAlertActions">
+          <button id="reminderAlertOpen" class="miniButton" type="button" data-i18n="openAction">Open</button>
+          <button id="reminderAlertDismiss" class="miniButton" type="button" data-i18n="dismissAction">Dismiss</button>
+        </div>
+      </div>
+
+      <main class="content popupContent">
+        <aside class="folders popupFolders">
+          <h2 id="folderHeading" aria-hidden="true"></h2>
+          <div id="folderList"></div>
+          <div id="foldersFooter" class="foldersFooter"></div>
+        </aside>
+
+        <section class="panel popupPanel">
+          <div id="bookmarkPanel">
+            <div class="panelHeader">
+              <div class="panelTitle">
+                <h2 id="bookmarkTitle" data-i18n="allBookmarksHeading">All Bookmarks</h2>
+                <span id="bookmarkCount"></span>
+              </div>
+              <div class="bookmarkControls">
+                <div id="bookmarkFilters" class="bookmarkFilters" role="group" aria-label="Bookmark view filter">
+                  <button type="button" class="filterChip active" data-view-filter="all" data-i18n="pinFilterAll">All</button>
+                  <button type="button" class="filterChip" data-view-filter="pinned" data-i18n="pinFilterPinned">Pinned only</button>
+                  <button type="button" class="filterChip" data-view-filter="unpinned" data-i18n="pinFilterUnpinned">Unpinned</button>
+                </div>
+                <div id="bookmarkTabTools" class="bookmarkTabTools"></div>
+                <label id="sortField" class="sortField">
+                  <span data-i18n="sortLabel">Sort</span>
+                  <select id="sortSelect">
+                    <option value="newest" data-i18n="sortNewest">Newest</option>
+                    <option value="oldest" data-i18n="sortOldest">Oldest</option>
+                    <option value="az" data-i18n="sortAz">A-Z</option>
+                    <option value="recent-opened" data-i18n="sortRecentOpened">Recently Opened</option>
+                    <option value="most-opened" data-i18n="sortMostOpened">Most Opened</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+            <div id="bookmarkList" class="list"></div>
+          </div>
+
+          <div id="sessionPanel" class="hidden">
+            <div class="panelHeader">
+              <h2 data-i18n="recentSessionsHeading">Recent Sessions</h2>
+            </div>
+            <div id="sessionList" class="list"></div>
+          </div>
+
+          <div id="settingsPanel" class="hidden">
+            <div class="panelHeader">
+              <h2 data-i18n="settingsHeading">Settings</h2>
+            </div>
+            <div class="settingsList">
+              <label class="settingItem">
+                <span class="settingText">
+                  <strong data-i18n="settingPrivacyTitle">Enable privacy mode</strong>
+                  <small data-i18n="settingPrivacyDescription">Show the Private tab and keep hidden bookmarks outside Chrome bookmarks.</small>
+                </span>
+                <input id="privacyModeCheckbox" type="checkbox" />
+              </label>
+              <label class="settingItem">
+                <span class="settingText">
+                  <strong data-i18n="settingHideDuplicatesTitle">Hide duplicate bookmarks</strong>
+                  <small data-i18n="settingHideDuplicatesDescription">Keep only the first result for the same URL in lists.</small>
+                </span>
+                <input id="hideDuplicateBookmarksCheckbox" type="checkbox" checked />
+              </label>
+              <label class="settingItem settingItemSelect">
+                <span class="settingText">
+                  <strong data-i18n="settingCardDensityTitle">Card density</strong>
+                  <small data-i18n="settingCardDensityDescription">Choose between a single-column list or two-column cards in popup views.</small>
+                </span>
+                <select id="cardDensitySelect" class="settingSelect">
+                  <option value="list" data-i18n="settingCardDensityList">List</option>
+                  <option value="2-column" data-i18n="settingCardDensityTwoColumn">2-column</option>
+                </select>
+              </label>
+              <label class="settingItem">
+                <span class="settingText">
+                  <strong data-i18n="settingContextMenuTitle">Enable Save Private Page in right-click menu</strong>
+                  <small data-i18n="settingContextMenuDescription">Off by default. Adds a page context menu item so you can save the current site into hidden private bookmarks.</small>
+                </span>
+                <input id="privateContextMenuCheckbox" type="checkbox" />
+              </label>
+              <label class="settingItem">
+                <span class="settingText">
+                  <strong data-i18n="settingLocalCaptureContextMenuTitle">Enable Local Capture in right-click menu</strong>
+                  <small data-i18n="settingLocalCaptureContextMenuDescription">On by default. Adds actions for selected text, links, and images.</small>
+                </span>
+                <input id="localCaptureContextMenuCheckbox" type="checkbox" checked />
+              </label>
+              <div class="settingCardBlock">
+                <div class="settingText">
+                  <strong data-i18n="settingLocalCapturesTitle">Local Captures</strong>
+                  <small data-i18n="settingLocalCapturesDescription">Capture pages and keep local text, links, and images in this extension.</small>
+                </div>
+                <span id="localCapturesCountLabel" class="settingCountPill">0</span>
+              </div>
+              <div class="settingStatsGrid">
+                <span class="settingCountPill" id="localCountText">0 Text</span>
+                <span class="settingCountPill" id="localCountLinks">0 Links</span>
+                <span class="settingCountPill" id="localCountImages">0 Images</span>
+                <span class="settingCountPill" id="localCountVideos">0 Videos</span>
+                <span class="settingCountPill" id="localCountPages">0 Pages</span>
+              </div>
+              <div class="settingActionGrid">
+                <button id="captureCurrentPageButton" type="button" class="btn btn-outline" data-i18n="captureCurrentPageAction">Capture Current Page</button>
+                <select id="localCaptureExportSelect" class="selectionSelect">
+                  <option value="all" data-i18n="exportAllOption">Export All</option>
+                  <option value="selection" data-i18n="localFilterText">Text</option>
+                  <option value="link" data-i18n="localFilterLinks">Links</option>
+                  <option value="image" data-i18n="localFilterImages">Images</option>
+                  <option value="video" data-i18n="localFilterVideos">Videos</option>
+                  <option value="page" data-i18n="localFilterPages">Pages</option>
+                </select>
+                <button id="exportLocalCapturesButton" type="button" class="btn btn-outline" data-i18n="exportLocalCapturesAction">Export Local Captures</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="reminderPanel" class="hidden">
+            <div class="panelHeader">
+              <div class="panelTitle">
+                <h2 data-i18n="remindersHeading">Reminders</h2>
+                <span id="reminderCount"></span>
+              </div>
+            </div>
+            <div class="reminderComposer">
+              <input id="reminderTitleInput" type="text" placeholder="Reminder title" data-i18n-placeholder="reminderTitlePlaceholder" />
+              <input id="reminderUrlInput" type="url" placeholder="Optional URL" data-i18n-placeholder="reminderUrlPlaceholder" />
+              <div class="reminderComposerRow">
+                <input id="reminderDateInput" type="datetime-local" />
+                <button id="reminderUseCurrentPageButton" class="btn btn-outline" type="button">
+                  <span data-i18n="useCurrentPage">Use Current Page</span>
+                </button>
+                <button id="addReminderButton" class="btn btn-primary" type="button" data-i18n="addReminder">Add Reminder</button>
+              </div>
+              <label class="checkboxRow">
+                <input id="reminderLimitedTimeCheckbox" type="checkbox" />
+                <span data-i18n="limitedTimeReminder">Limited-time: delete linked private bookmark after alert</span>
+              </label>
+            </div>
+            <div id="reminderDebug" class="reminderDebug" data-i18n="reminderDebugNote">
+              Chrome desktop reminder. Test 10s should fire a local notification.
+            </div>
+            <div id="weekdayFilter" class="weekdayFilter"></div>
+            <div class="reminderSections">
+              <section class="reminderSection">
+                <div class="sectionTitle" data-i18n="todayHeading">Today</div>
+                <div id="todayReminders" class="reminderList"></div>
+              </section>
+              <section class="reminderSection">
+                <div class="sectionTitle" data-i18n="thisWeekHeading">This Week</div>
+                <div id="weekReminders" class="reminderList"></div>
+              </section>
+              <section class="reminderSection">
+                <div class="sectionTitle" data-i18n="doneHeading">Done</div>
+                <div id="doneReminders" class="reminderList"></div>
+              </section>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="popupFooter">
+        <div class="popupFootnote" data-i18n="popupFootnote">Local-first. Your data stays in Chrome unless you export it.</div>
+        <a class="popupLink" id="fullLibraryLink" href="#" target="_blank" rel="noreferrer">
+          <span data-i18n="openBookmarksPage">Open web bookmarks page</span>
+        </a>
+      </footer>
+    </div>
+
+    <input id="fileInput" type="file" accept="application/json" hidden />
+    <script src="./i18n.js"></script>
+    <script src="./sidepanel.js"></script>
+  </body>
+  </html>
